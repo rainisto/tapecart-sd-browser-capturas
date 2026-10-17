@@ -39,8 +39,11 @@ def main():
     if os.path.exists(tpath):
         for line in open(tpath, encoding='utf-8'):
             if ';' in line:
-                k, v = line.rstrip('\n').split(';', 1)
-                titles[k.strip().replace('\\', '/').lower()] = v.strip()
+                parts = line.rstrip('\n').split(';')
+                if len(parts) >= 2:
+                    k = parts[0].strip().replace('\\', '/').lower()
+                    v = parts[1].strip()
+                    titles[k] = v
 
     cat = []
     for dp, dn, fn in os.walk(sd):

@@ -17,6 +17,7 @@ Microsoft Access (viene con Office o con "Access Database Engine") y el tar de W
 import argparse, glob, os, shutil, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+CHUNK = 1024 * 1024
 
 
 def say(es, en):
@@ -37,6 +38,21 @@ def find(root, pattern):
 def extract(archive, dest):
     os.makedirs(dest, exist_ok=True)
     run(['tar', '-xf', archive, '-C', dest])
+
+
+def files_equal(src, dst):
+    if not os.path.exists(dst):
+        return False
+    if os.path.getsize(src) != os.path.getsize(dst):
+        return False
+    with open(src, 'rb') as fs, open(dst, 'rb') as fd:
+        while True:
+            a = fs.read(CHUNK)
+            b = fd.read(CHUNK)
+            if a != b:
+                return False
+            if not a:
+                return True
 
 
 def find_innoextract():
@@ -124,18 +140,26 @@ def main():
         run(py + [os.path.join(HERE, 'catalogo_html.py'), '--pack', catalog, shots, a.catalogo])
 
     copied = []
+    skipped = 0
     for dp, dn, fn in os.walk(out):
         for f in fn:
-            rel = os.path.relpath(os.path.join(dp, f), out)
+            src = os.path.join(dp, f)
+            rel = os.path.relpath(src, out)
             copied.append(rel)
             if not a.no_copiar:
-                shutil.copyfile(os.path.join(dp, f), os.path.join(a.sd, rel))
+                dst = os.path.join(a.sd, rel)
+                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                if files_equal(src, dst):
+                    skipped += 1
+                    continue
+                shutil.copyfile(src, dst)
     if a.no_copiar:
         say(f'Listo. {len(copied)} archivos en {out} (no se copiaron a la SD)',
             f'Done. {len(copied)} files in {out} (not copied to the SD)')
     else:
-        say(f'Listo. Se copiaron {len(copied)} archivos (index.db / shots.db) a la SD',
-            f'Done. {len(copied)} files (index.db / shots.db) copied to the SD')
+        written = len(copied) - skipped
+        say(f'Listo. Se copiaron {written} archivos y se saltearon {skipped} sin cambios',
+            f'Done. Copied {written} files and skipped {skipped} unchanged files')
 
 
 if __name__ == '__main__':
