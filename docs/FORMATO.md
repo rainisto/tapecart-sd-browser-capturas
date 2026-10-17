@@ -5,7 +5,8 @@ Los nombres son exactamente `index.db` y `shots.db` (en minúsculas).
 
 ## `index.db`
 
-Registros de 80 bytes. El primero es el encabezado, el resto un registro por archivo,
+Registros de 80 bytes. El primero es el encabezado, el resto un registro por entrada
+(archivo o carpeta),
 en el orden en que se muestran.
 
 ### Encabezado
@@ -16,7 +17,7 @@ en el orden en que se muestran.
 | 4 | 1 | versión = 1 |
 | 6 | 2 | cantidad de registros (little endian) |
 | 8 | 1 | 1 si hay `shots.db` |
-| 10 | 2 | cantidad de archivos de la carpeta al generar el índice (sin contar `index.db`/`shots.db`) |
+| 10 | 2 | cantidad de entradas visibles al generar el índice (sin contar `index.db`/`shots.db`) |
 | 16 | 30 | título de la carpeta (PETSCII, juego de minúsculas) |
 
 Si la cantidad de archivos de la carpeta ya no coincide con el campo del offset 10
@@ -27,7 +28,7 @@ normal hasta que se regenere.
 
 | Offset | Bytes | Contenido |
 |---|---|---|
-| 0 | 1 | tipo: 2 = PRG, 3 = TCRT, 4 = TAP, 255 = no cargable |
+| 0 | 1 | tipo: 1 = carpeta, 2 = PRG, 3 = TCRT, 4 = TAP, 255 = no cargable |
 | 1 | 16 | nombre del archivo en la SD (ASCII, máximo 16 caracteres) |
 | 17 | 30 | título para mostrar (PETSCII, juego de minúsculas) |
 | 47 | 4 | año (PETSCII) |

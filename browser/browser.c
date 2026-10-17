@@ -56,6 +56,11 @@
 #define LIST_Y    2
 #define LIST_H    20
 #define MAX_DIR   1000
+/* 0 = mostrar las carpetas sin indice en el orden de la SD (FAT), como el browser
+   viejo: rapido en carpetas con cientos de entradas. 1 = ordenar alfabeticamente en
+   el C64 con qsort (lento en carpetas grandes). Para tener orden alfabetico sin el
+   costo del qsort, ordena la tabla de directorios de la SD en el PC (p.ej. DriveSort). */
+#define SORT_DIR  0
 
 typedef struct {
     uint8_t  type;
@@ -238,6 +243,7 @@ static uint8_t read_classic(void)
     return found;
 }
 
+#if SORT_DIR
 /* orden: ".." primero, luego carpetas, luego archivos; alfabetico sin
    distinguir mayusculas */
 static int __fastcall__ cmp_elem(const void *a, const void *b)
@@ -262,6 +268,26 @@ static int __fastcall__ cmp_elem(const void *a, const void *b)
     }
 }
 
+/* Insertion sort en vez de qsort: el orden FAT de la SD suele venir ya casi
+   alfabetico, que es el mejor caso para insertion sort (~O(n)) y el PEOR para
+   qsort (degrada a O(n^2)). Produce exactamente el mismo orden que
+   qsort(cmp_elem), asi que la navegacion se comporta igual que con qsort. */
+static void sort_dir(uint16_t n)
+{
+    uint16_t i, j;
+    DirElem key;
+    for (i = 1; i < n; ++i) {
+        key = dir[i];
+        j = i;
+        while (j > 0 && cmp_elem(&dir[j - 1], &key) > 0) {
+            dir[j] = dir[j - 1];
+            --j;
+        }
+        dir[j] = key;
+    }
+}
+#endif
+
 static void open_dir(const char *path)
 {
     char p[FILENAME_LENGTH + 1];
@@ -281,30 +307,34 @@ static void open_dir(const char *path)
     page_loaded = -1;
     indexed = 0;
     has_shots = 0;
+    sel_file[0] = 0;   /* olvidar el archivo seleccionado: cada carpeta tiene su
+                          propio index.db, hay que volver a seleccionarlo al entrar */
     copy_fixed(folder_title, cur_dir, FILENAME_LENGTH);
 
     /* Solo se selecciona index.db si aparece en el listado: si el firmware
        no encuentra un archivo, remonta la SD y vuelve a la raiz. */
     if (read_classic()) {
-        uint16_t files = count;
+        uint16_t entries = count;
         if (count && dir[0].name[0] == '.' && dir[0].name[1] == '.') {
-            --files;
+            --entries;
         }
         select_name(IDX_NAME);
         tapecart_read_flash_fast(0, REC_SIZE, tmp_hdr);
-        /* "TCIX" v1, y la cantidad de archivos coincide (si no, el indice
+        /* "TCIX" v1, y la cantidad de entradas visibles coincide (si no, el indice
            esta desactualizado y se usa el listado normal) */
         if (tmp_hdr[0] == 0x54 && tmp_hdr[1] == 0x43 && tmp_hdr[2] == 0x49 && tmp_hdr[3] == 0x58 &&
-            tmp_hdr[4] == 1 && (tmp_hdr[10] | (tmp_hdr[11] << 8)) == files) {
+            tmp_hdr[4] == 1 && (tmp_hdr[10] | (tmp_hdr[11] << 8)) == entries) {
             indexed = 1;
             count = tmp_hdr[6] | (tmp_hdr[7] << 8);
             has_shots = tmp_hdr[8];
             copy_fixed(folder_title, (char *)tmp_hdr + 16, TITLE_LEN);
         }
     }
+#if SORT_DIR
     if (!indexed && count > 1) {
-        qsort(dir, count, sizeof(DirElem), cmp_elem);
+        sort_dir(count);
     }
+#endif
 }
 
 /* ---------------------------------------------------------------- pantalla */

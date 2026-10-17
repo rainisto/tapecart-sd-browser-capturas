@@ -69,7 +69,10 @@ no incluye ningún índice: cada usuario los genera con su propia copia.
 - Los pasos por separado (`export_gb64.ps1`, `build_catalog.py`, `gen_db.py`) siguen disponibles en `tools/`.
 
 Consejos:
-- **Nombres de 16 caracteres como máximo** (extensión incluida). Los más largos el firmware los muestra en formato 8.3 (`LASTNI~1.TAP`).
+- Sin índice, el firmware sigue limitado a **16 caracteres** y muestra nombres largos en formato 8.3 (`LASTNI~1.TAP`).
+- Con `index.db`, el browser puede mostrar nombres largos (hasta 30) para archivos y carpetas, aunque internamente siga entrando por el nombre corto/8.3.
+- `generar_sd.py` también crea índices en carpetas padre (por ejemplo `c64games` y `c64games/a`) para que los listados intermedios muestren nombres largos.
+- Al copiar a la SD, `generar_sd.py` compara el contenido y saltea `index.db`/`shots.db` sin cambios para reducir escrituras innecesarias.
 - Si agregás juegos a una carpeta con índice, el browser lo detecta y muestra el listado normal hasta que regeneres el índice.
 - El firmware **no carga D64/G64/T64**.
 
@@ -195,7 +198,10 @@ index files: every user builds their own from their own copy.
 - The individual steps (`export_gb64.ps1`, `build_catalog.py`, `gen_db.py`) are still available in `tools/`.
 
 Tips:
-- **Keep file names at 16 characters or fewer** (extension included); longer ones show as 8.3 names (`LASTNI~1.TAP`).
+- Without an index, firmware is still limited to **16 characters** and shows long names as 8.3 (`LASTNI~1.TAP`).
+- With `index.db`, the browser can show long names (up to 30) for files and folders, while still entering them through the short/8.3 name internally.
+- `generar_sd.py` also creates indexes in parent folders (for example `c64games` and `c64games/a`) so intermediate listings can show long names.
+- When copying to the SD, `generar_sd.py` compares file contents and skips unchanged `index.db`/`shots.db` files to reduce unnecessary writes.
 - If you add games to an indexed folder, the browser notices and shows the plain listing until you regenerate the index.
 - The firmware **does not load D64/G64/T64**.
 
