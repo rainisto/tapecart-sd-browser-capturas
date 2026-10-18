@@ -28,7 +28,7 @@ normal hasta que se regenere.
 
 | Offset | Bytes | Contenido |
 |---|---|---|
-| 0 | 1 | tipo: 1 = carpeta, 2 = PRG, 3 = TCRT, 4 = TAP, 255 = no cargable |
+| 0 | 1 | tipo: 1 = carpeta, 2 = PRG/P00, 3 = TCRT, 4 = TAP, 255 = no cargable |
 | 1 | 16 | nombre del archivo en la SD (ASCII, máximo 16 caracteres) |
 | 17 | 30 | título para mostrar (PETSCII, juego de minúsculas) |
 | 47 | 4 | año (PETSCII) |
