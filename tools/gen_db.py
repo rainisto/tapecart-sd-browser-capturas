@@ -13,7 +13,7 @@ from png2c64 import convert, SLOT
 REC = 80
 TITLE_LEN = 30
 PUB_LEN = 24
-TYPES = {'prg': 2, 'tcrt': 3, 'tap': 4}
+TYPES = {'prg': 2, 'p00': 2, 'tcrt': 3, 'tap': 4}
 GENRES = {'Arcade': 1, "Shoot'em Up": 2, 'Adventure': 3, 'Brain': 4, 'Educational': 5,
           'Sports': 6, 'Strategy': 7, 'Gambling': 8, 'Board Game': 9, 'Cards': 10,
           'Racing': 11, 'Simulation': 12, 'Miscellaneous': 13}

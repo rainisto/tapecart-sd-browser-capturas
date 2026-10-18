@@ -29,7 +29,7 @@ Fork por **Christian Di Guardia** (Argentina), 2026.
 - En carpetas con `shots.db`: **ESPACIO** muestra la captura del juego (bitmap hires o multicolor). RETURN desde la captura carga el juego.
 - Carpetas sin índice: funciona como el original, pero **ordena alfabéticamente** (el original muestra el orden físico de la SD).
 - Oculta carpetas de sistema (`System Volume Information`, `$RECYCLE.BIN`, archivos de macOS).
-- Carga PRG, TCRT y TAP igual que el original. **No hace falta cambiar el firmware.**
+- Carga PRG, P00, TCRT y TAP igual que el original. **No hace falta cambiar el firmware.**
 
 ### Requisitos
 
@@ -159,7 +159,7 @@ Fork by **Christian Di Guardia** (Argentina), 2026. The browser comes in English
 - Folders with a `shots.db`: **SPACE** shows the game's screenshot (hires or multicolor bitmap); RETURN from there loads the game.
 - Folders without an index work like the original, but are **sorted alphabetically** (the original shows the physical SD order).
 - Hides system folders (`System Volume Information`, `$RECYCLE.BIN`, macOS files).
-- Loads PRG, TCRT and TAP like the original. **No firmware change needed.**
+- Loads PRG, P00, TCRT and TAP like the original. **No firmware change needed.**
 
 ### Requirements
 
