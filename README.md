@@ -27,7 +27,7 @@ Fork por **Christian Di Guardia** (Argentina), 2026.
 
 - En carpetas con `index.db`: nombre completo (hasta 30 caracteres; el firmware solo muestra 16), año, género y editor.
 - En carpetas con `shots.db`: **ESPACIO** muestra la captura del juego (bitmap hires o multicolor). RETURN desde la captura carga el juego.
-- Carpetas sin índice: funciona como el original, pero **ordena alfabéticamente** (el original muestra el orden físico de la SD).
+- Carpetas sin índice: funciona como el original, pero **ordena alfabéticamente** las que tienen hasta 100 entradas (el original muestra el orden físico de la SD). Las más grandes se muestran en el orden de la SD para no demorar; para esas conviene generar su `index.db` u ordenar la SD en la PC con DriveSort (Windows) o FATSort (Linux).
 - Oculta carpetas de sistema (`System Volume Information`, `$RECYCLE.BIN`, archivos de macOS).
 - Carga PRG, P00, TCRT y TAP igual que el original. **No hace falta cambiar el firmware.**
 
@@ -44,7 +44,7 @@ Fork por **Christian Di Guardia** (Argentina), 2026.
 1. Hacé una copia de tu `browser.prg` original.
 2. Copiá **`bin/browser_es.prg`** (español) o **`bin/browser_en.prg`** (inglés) a la raíz de la SD y
    renombralo a **`browser.prg`**: el firmware siempre carga `/browser.prg`.
-3. Sin índices, ya funciona: listado ordenado alfabéticamente.
+3. Sin índices, ya funciona (las carpetas de hasta 100 entradas se ordenan alfabéticamente).
 
 ### Generar índices y capturas para tu colección
 
@@ -157,7 +157,7 @@ Fork by **Christian Di Guardia** (Argentina), 2026. The browser comes in English
 
 - Folders with an `index.db`: full name (up to 30 characters; the firmware only shows 16), year, genre and publisher.
 - Folders with a `shots.db`: **SPACE** shows the game's screenshot (hires or multicolor bitmap); RETURN from there loads the game.
-- Folders without an index work like the original, but are **sorted alphabetically** (the original shows the physical SD order).
+- Folders without an index work like the original, but those with up to 100 entries are **sorted alphabetically** (the original shows the physical SD order). Larger ones keep the SD order to avoid delays; for those, generate their `index.db` or sort the SD on a PC with DriveSort (Windows) or FATSort (Linux).
 - Hides system folders (`System Volume Information`, `$RECYCLE.BIN`, macOS files).
 - Loads PRG, P00, TCRT and TAP like the original. **No firmware change needed.**
 
@@ -174,7 +174,7 @@ Fork by **Christian Di Guardia** (Argentina), 2026. The browser comes in English
 1. Back up your original `browser.prg`.
 2. Copy **`bin/browser_en.prg`** (English) or **`bin/browser_es.prg`** (Spanish) to the SD root and
    rename it to **`browser.prg`**: the firmware always loads `/browser.prg`.
-3. Without indexes it already works, with an alphabetically sorted listing.
+3. Without indexes it already works (folders of up to 100 entries are sorted alphabetically).
 
 ### Generating indexes and screenshots for your collection
 

@@ -56,11 +56,18 @@
 #define LIST_Y    2
 #define LIST_H    20
 #define MAX_DIR   1000
-/* 0 = mostrar las carpetas sin indice en el orden de la SD (FAT), como el browser
-   viejo: rapido en carpetas con cientos de entradas. 1 = ordenar alfabeticamente en
-   el C64 con qsort (lento en carpetas grandes). Para tener orden alfabetico sin el
-   costo del qsort, ordena la tabla de directorios de la SD en el PC (p.ej. DriveSort). */
-#define SORT_DIR  0
+/* Carpetas sin indice: se ordenan alfabeticamente en el C64 solo si tienen hasta
+   SORT_MAX entradas (la raiz, utilidades, etc.: es instantaneo). Las mas grandes se
+   muestran en el orden de la SD (FAT), porque ordenarlas en el C64 tarda varios
+   segundos; para esas conviene ordenar la tabla de directorios de la SD en el PC
+   (p.ej. DriveSort en Windows o FATSort en Linux) o generar su index.db.
+   SORT_MAX 0 desactiva el orden por completo. */
+#ifndef SORT_MAX
+#define SORT_MAX  100
+#endif
+#if SORT_MAX > 255
+#error SORT_MAX debe ser <= 255
+#endif
 
 typedef struct {
     uint8_t  type;
@@ -243,48 +250,58 @@ static uint8_t read_classic(void)
     return found;
 }
 
-#if SORT_DIR
-/* orden: ".." primero, luego carpetas, luego archivos; alfabetico sin
-   distinguir mayusculas */
-static int __fastcall__ cmp_elem(const void *a, const void *b)
-{
-    const DirElem *x = (const DirElem *)a;
-    const DirElem *y = (const DirElem *)b;
-    const char *p, *q;
-    uint8_t cx, cy;
+#if SORT_MAX
+/* Orden: ".." primero, luego carpetas, luego archivos; alfabetico sin distinguir
+   mayusculas. Para que sea rapido en el C64 se arma una sola vez una clave por entrada
+   (clase + nombre en minusculas) y se ordena un arreglo de indices de 1 byte con
+   Shell sort, comparando las claves con memcmp (en assembler). Al final el listado se
+   reacomoda una sola vez. */
+#define KEY_LEN (FILENAME_LENGTH + 1)
+static char     sort_key[SORT_MAX][KEY_LEN];
+static uint8_t  sort_idx[SORT_MAX];
+static DirElem  sort_tmp[SORT_MAX];
 
-    if (x->name[0] == '.' && x->name[1] == '.') return -1;
-    if (y->name[0] == '.' && y->name[1] == '.') return 1;
-    if ((x->type == FILE_DIR) != (y->type == FILE_DIR)) {
-        return x->type == FILE_DIR ? -1 : 1;
-    }
-    p = x->name;
-    q = y->name;
-    for (;;) {
-        cx = lc(*p++);
-        cy = lc(*q++);
-        if (cx != cy) return cx < cy ? -1 : 1;
-        if (!cx) return 0;
-    }
-}
-
-/* Insertion sort en vez de qsort: el orden FAT de la SD suele venir ya casi
-   alfabetico, que es el mejor caso para insertion sort (~O(n)) y el PEOR para
-   qsort (degrada a O(n^2)). Produce exactamente el mismo orden que
-   qsort(cmp_elem), asi que la navegacion se comporta igual que con qsort. */
-static void sort_dir(uint16_t n)
+static void sort_dir(uint8_t n)
 {
-    uint16_t i, j;
-    DirElem key;
-    for (i = 1; i < n; ++i) {
-        key = dir[i];
-        j = i;
-        while (j > 0 && cmp_elem(&dir[j - 1], &key) > 0) {
-            dir[j] = dir[j - 1];
-            --j;
+    static const uint8_t gaps[] = { 40, 13, 4, 1 };
+    uint8_t i, j, g, gap, t;
+    char *k;
+    const char *p;
+
+    for (i = 0; i < n; ++i) {
+        k = sort_key[i];
+        p = dir[i].name;
+        if (p[0] == '.' && p[1] == '.') {
+            k[0] = 0;
+        } else {
+            k[0] = dir[i].type == FILE_DIR ? 1 : 2;
         }
-        dir[j] = key;
+        for (j = 0; j < FILENAME_LENGTH && p[j]; ++j) {
+            k[j + 1] = lc(p[j]);
+        }
+        for (; j < FILENAME_LENGTH; ++j) {
+            k[j + 1] = 0;
+        }
+        sort_idx[i] = i;
     }
+
+    for (g = 0; g < sizeof(gaps); ++g) {
+        gap = gaps[g];
+        for (i = gap; i < n; ++i) {
+            t = sort_idx[i];
+            j = i;
+            while (j >= gap && memcmp(sort_key[sort_idx[j - gap]], sort_key[t], KEY_LEN) > 0) {
+                sort_idx[j] = sort_idx[j - gap];
+                j -= gap;
+            }
+            sort_idx[j] = t;
+        }
+    }
+
+    for (i = 0; i < n; ++i) {
+        sort_tmp[i] = dir[sort_idx[i]];
+    }
+    memcpy(dir, sort_tmp, n * sizeof(DirElem));
 }
 #endif
 
@@ -330,9 +347,9 @@ static void open_dir(const char *path)
             copy_fixed(folder_title, (char *)tmp_hdr + 16, TITLE_LEN);
         }
     }
-#if SORT_DIR
-    if (!indexed && count > 1) {
-        sort_dir(count);
+#if SORT_MAX
+    if (!indexed && count > 1 && count <= SORT_MAX) {
+        sort_dir((uint8_t)count);
     }
 #endif
 }

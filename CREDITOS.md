@@ -10,6 +10,8 @@ Este proyecto es un **fork**. El trabajo de base es de:
 
 Fork con capturas, índices y orden alfabético: **Christian Di Guardia**, 2026.
 
+Nombres largos mediante alias 8.3, índices de carpetas, soporte de P00 y otras mejoras: **Jonni Rainisto**, 2026.
+
 Capturas y datos de juegos: **GameBase64** (© GB64 Team, <https://www.gb64.com>), usados solo para uso personal.
 No se incluyen en este proyecto.
 
